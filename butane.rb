@@ -12,7 +12,6 @@ def monitor_room(room, config = {})
   ignore = config[:ignore]
 
   room_name = room.name.gsub /"/, '' # Get rid of any dquotes since we use 'em to delimit person
-
   last_message_id = 0
   room.listen do |m|
     # Ignore any pings from campfire to determine if I'm still
@@ -22,7 +21,7 @@ def monitor_room(room, config = {})
     next if m[:id].to_i <= last_message_id
     last_message_id = m[:id].to_i
 
-    delay = 5000 # in milliseconds (time to display the notification)
+    delay = "" # in milliseconds (time to display the notification)
 
 
     # If we're to monitor something in particular in this room, set the
@@ -76,7 +75,7 @@ account_names.each do |account_name|
 
     # Start up a thread for each room we are going to monitor
     rooms.keys.each do |room_name|
-      print "  Looking for room #{room_name} ... "
+      notify("  Looking for room ","#{room_name} ... ")
       room = campfire.find_room_by_name room_name
       if room
         room_cfg = rooms[room_name] || {}
