@@ -9,12 +9,21 @@ end
 
 def monitor_room(room, config = {})
   sticky = config[:sticky]
+  ignore = config[:ignore]
+
+  room_name = room.name.gsub /"/, '' # Get rid of any dquotes since we use 'em to delimit person
+
+  last_message_id = 0
   room.listen do |m|
     # Ignore any pings from campfire to determine if I'm still
     # here
     next if m[:person].strip.empty?  # Ignore anything from a nil / empty person
 
-    delay = "" # in milliseconds (time to display the notification)
+    next if m[:id].to_i <= last_message_id
+    last_message_id = m[:id].to_i
+
+    delay = 5000 # in milliseconds (time to display the notification)
+
 
     # If we're to monitor something in particular in this room, set the
     # delay notification to zero which will leave the message up until
@@ -23,9 +32,16 @@ def monitor_room(room, config = {})
       delay = '-t 0' if m[:message] =~ /#{sticky}/i
     end
 
+    if ignore
+      next if m[:message] =~ /#{ignore}/
+    end
+
     img_opt = "-i #{config[:image]}" if config[:image]
 
+    person = m[:person].gsub /"/, ''  # Get rid of any dquotes since we use 'em to delimit person
+
     msg = m[:message].dup
+    msg.gsub! /'/, ''       # Get rid of single quotes since we use 'em to delimit msg
     msg.gsub! '\u003E', '>'
     msg.gsub! '\u003C', '<'
     msg.gsub! '\u0026', '&'
@@ -34,8 +50,10 @@ def monitor_room(room, config = {})
 
     # And let's remove all but the href attribute in any anchors
     # in the msg.  Assumes that in href=stuff, stuff has no whitespace.
+
     msg.gsub! /<a[^>]+(href=[^\s]+)[^>]*>/, '<a \1>'
     notify(m[:person],msg,{:img => img_opt, :delay => delay})
+
   end
 end
 
@@ -61,7 +79,7 @@ account_names.each do |account_name|
       print "  Looking for room #{room_name} ... "
       room = campfire.find_room_by_name room_name
       if room
-        room_cfg = rooms[room_name]
+        room_cfg = rooms[room_name] || {}
         room_cfg[:image] ||= account_img
         puts "  got it and monitoring."
         img_opt = "-i #{config[account_name][:image]}" if config[account_name][:image]
