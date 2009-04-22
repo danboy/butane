@@ -1,16 +1,6 @@
---- 
-mycampfire: 
-  :login: rick@email.com
-  :password: mypassword
-  :rooms: 
-    First Room: 
-      :sticky: rick
-    Git Commits: 
-      :sticky: models|specs
-
-otheraccount:
-  :login: rick@email.com
-  :password: someotherpassword
+obtiva:
+  :login: dnawara@obtiva.com
+  :password: elsol100
   :rooms:
-    Light is Nice:
-      :sticky: rick
+    SkillRazor:
+      :sticky: dan | dnawara
